@@ -1,0 +1,34 @@
+import { Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { FinanceInteligenceEntity } from '../entity/finance-inteligence.entity';
+
+@Injectable()
+export class FinanceInteligenceRepository {
+  constructor(
+    @InjectRepository(FinanceInteligenceEntity)
+    private readonly repo: Repository<FinanceInteligenceEntity>,
+  ) {}
+
+  public async create(data: Partial<FinanceInteligenceEntity>): Promise<FinanceInteligenceEntity> {
+    const newRecord = this.repo.create(data);
+    return this.repo.save(newRecord);
+  }
+
+  public async findAll(): Promise<FinanceInteligenceEntity[]> {
+    return this.repo.find();
+  }
+
+  public async findOne(id: number): Promise<FinanceInteligenceEntity | null> {
+    return this.repo.findOneBy({ id });
+  }
+
+  public async update(id: number, data: Partial<FinanceInteligenceEntity>): Promise<FinanceInteligenceEntity> {
+    await this.repo.update(id, data);
+    return this.repo.findOneByOrFail({ id });
+  }
+
+  public async remove(id: number): Promise<void> {
+    await this.repo.delete(id);
+  }
+}
