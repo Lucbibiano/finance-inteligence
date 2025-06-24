@@ -10,7 +10,7 @@ calculateVariation(stock: FinanceInteligenceEntity, currentPrice: number): Varia
   const diffPercent = (diff / stock.avgPrice) * 100;
 
   return {
-    ...stock,
+    ticker: stock.ticker,
     currentPrice,
     priceVariation: diff,
     priceVariationPercent: diffPercent,
