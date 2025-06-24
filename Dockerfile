@@ -16,12 +16,10 @@ RUN apt-get update && apt-get install -y \
   default-mysql-client \
   && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-COPY --from=builder /app /app
-COPY --from=builder /app/dist ./dist
-COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/package*.json ./
+COPY package*.json ./
+RUN npm install
 
-RUN npm install --only=development
+COPY . .
 
 EXPOSE 3000
 

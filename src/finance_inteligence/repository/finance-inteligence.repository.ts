@@ -19,16 +19,16 @@ export class FinanceInteligenceRepository {
     return this.repo.find();
   }
 
-  public async findOne(id: number): Promise<FinanceInteligenceEntity | null> {
+  public async findOne(id: string): Promise<FinanceInteligenceEntity | null> {
     return this.repo.findOneBy({ id });
   }
 
-  public async update(id: number, data: Partial<FinanceInteligenceEntity>): Promise<FinanceInteligenceEntity> {
+  public async update(id: string, data: Partial<FinanceInteligenceEntity>): Promise<FinanceInteligenceEntity> {
     await this.repo.update(id, data);
     return this.repo.findOneByOrFail({ id });
   }
 
-  public async remove(id: number): Promise<void> {
+  public async remove(id: string): Promise<void> {
     await this.repo.delete(id);
   }
 }
