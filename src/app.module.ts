@@ -5,13 +5,17 @@ import { ConfigModule } from '@nestjs/config';
 import { FinanceInteligenceRepository } from './finance_inteligence/repository/finance-inteligence.repository';
 import { FinanceInteligenceController } from './finance_inteligence/finance-inteligence.controller';
 import { FinanceInteligenceEntity } from './finance_inteligence/entity/finance-inteligence.entity';
+import { MarketPriceService } from './finance_inteligence/services/market-price.service';
+import { MarketIntegrationController } from './market_integration/market-integration.controller';
 
 @Module({
   imports: [
     ConfigModule.forRoot(),
     TypeOrmModule.forRoot({
       type: 'mysql',
-      host: process.env.DATABASE_HOST || (process.env.DOCKER_HOST ? '127.0.0.1' : 'mysql'),
+      host:
+        process.env.DATABASE_HOST ||
+        (process.env.DOCKER_HOST ? '127.0.0.1' : 'mysql'),
       port: parseInt(process.env.DATABASE_PORT || '3306', 10),
       username: process.env.DATABASE_USER || 'root',
       password: process.env.DATABASE_PASSWORD || 'root',
@@ -21,12 +25,13 @@ import { FinanceInteligenceEntity } from './finance_inteligence/entity/finance-i
       extra: {
         connectionLimit: 5,
         connectTimeout: 60000,
-        insecureAuth: true, 
+        insecureAuth: true,
       },
     }),
     TypeOrmModule.forFeature([FinanceInteligenceEntity]),
   ],
-  controllers: [FinanceInteligenceController],
-  providers: [FinanceInteligenceRepository],
+  controllers: [FinanceInteligenceController, MarketIntegrationController],
+  providers: [FinanceInteligenceRepository, MarketPriceService],
+  exports: [MarketPriceService],
 })
 export class AppModule {}
