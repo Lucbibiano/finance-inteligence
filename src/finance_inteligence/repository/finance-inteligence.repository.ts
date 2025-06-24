@@ -23,6 +23,10 @@ export class FinanceInteligenceRepository {
     return this.repo.findOneBy({ id });
   }
 
+  public async findOneByTicker(ticker: string): Promise<FinanceInteligenceEntity | null> {
+    return this.repo.findOneBy({ ticker: ticker.toUpperCase() });
+  }
+
   public async update(id: string, data: Partial<FinanceInteligenceEntity>): Promise<FinanceInteligenceEntity> {
     await this.repo.update(id, data);
     return this.repo.findOneByOrFail({ id });

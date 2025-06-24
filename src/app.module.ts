@@ -5,8 +5,9 @@ import { ConfigModule } from '@nestjs/config';
 import { FinanceInteligenceRepository } from './finance_inteligence/repository/finance-inteligence.repository';
 import { FinanceInteligenceController } from './finance_inteligence/finance-inteligence.controller';
 import { FinanceInteligenceEntity } from './finance_inteligence/entity/finance-inteligence.entity';
-import { MarketPriceService } from './finance_inteligence/services/market-price.service';
+import { MarketPriceService } from './market_integration/services/market-price.service';
 import { MarketIntegrationController } from './market_integration/market-integration.controller';
+import { FinanceInteligenceService } from './finance_inteligence/services/finance-inteligence.service';
 
 @Module({
   imports: [
@@ -31,7 +32,7 @@ import { MarketIntegrationController } from './market_integration/market-integra
     TypeOrmModule.forFeature([FinanceInteligenceEntity]),
   ],
   controllers: [FinanceInteligenceController, MarketIntegrationController],
-  providers: [FinanceInteligenceRepository, MarketPriceService],
-  exports: [MarketPriceService],
+  providers: [FinanceInteligenceRepository, MarketPriceService, FinanceInteligenceService],
+  exports: [MarketPriceService, FinanceInteligenceService],
 })
 export class AppModule {}

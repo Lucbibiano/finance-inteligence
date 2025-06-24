@@ -9,6 +9,7 @@ import {
   UsePipes,
   ValidationPipe,
   ParseUUIDPipe,
+  NotFoundException,
 } from '@nestjs/common';
 import { FinanceInteligenceRepository } from './repository/finance-inteligence.repository';
 import { FinanceInteligenceEntity } from './entity/finance-inteligence.entity';
@@ -16,7 +17,9 @@ import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { CreateStockDto } from './dto/create-stock.dto';
 import { UpdateStockDto } from './dto/update-stock.dto';
 import { UUID } from 'crypto';
-import { MarketPriceService } from './services/market-price.service';
+import { MarketPriceService } from '../market_integration/services/market-price.service';
+import { FinanceInteligenceService } from './services/finance-inteligence.service';
+import { VariationStockDto } from './dto/variation-stock.dto';
 
 @ApiTags('finance-inteligence')
 @Controller('finance-inteligence/stocks')
@@ -24,6 +27,7 @@ export class FinanceInteligenceController {
   constructor(
     private readonly repository: FinanceInteligenceRepository,
     private readonly marketPriceService: MarketPriceService,
+    private readonly financeInteligenceService: FinanceInteligenceService,
   ) {}
 
   @Post()
@@ -73,11 +77,15 @@ export class FinanceInteligenceController {
     return this.repository.remove(id);
   }
 
-  @Get('market-price/:ticker')
-  @ApiOperation({ summary: 'Consultar valor atual da ação pelo ticker.' })
-  @ApiResponse({ status: 200, description: 'Preço retornado com sucesso.' })
-  async getMarketPrice(@Param('ticker') ticker: string) {
-    const price = await this.marketPriceService.getPrice(ticker);
-    return { ticker, price };
+  @Get('variation/:ticker')
+  @ApiOperation({ summary: 'Consultar variação da ação pelo ticker.' })
+  @ApiResponse({ status: 200, description: 'Variação retornada com sucesso.' })
+  async getMarketVariation(@Param('ticker') ticker: string): Promise<VariationStockDto> {
+    const stockFinded = await this.repository.findOneByTicker(ticker);
+
+    if (!stockFinded) throw new NotFoundException('Ação não encontrada');
+
+    const currentPrice = await this.marketPriceService.getPrice(ticker);
+    return this.financeInteligenceService.calculateVariation(stockFinded, currentPrice)
   }
 }

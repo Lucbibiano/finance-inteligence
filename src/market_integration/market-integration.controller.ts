@@ -1,6 +1,6 @@
 import { Controller, Get, Param } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { MarketPriceService } from '../finance_inteligence/services/market-price.service';
+import { MarketPriceService } from './services/market-price.service';
 
 @ApiTags('market-integration')
 @Controller('market-integration')
