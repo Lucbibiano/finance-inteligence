@@ -20,6 +20,7 @@ import { UUID } from 'crypto';
 import { MarketPriceService } from '../market_integration/services/market-price.service';
 import { FinanceInteligenceService } from './services/finance-inteligence.service';
 import { VariationStockDto } from './dto/variation-stock.dto';
+import { RecommendationDto } from '../recommendation/dto/recommendation.dto';
 
 @ApiTags('finance-inteligence')
 @Controller('finance-inteligence/stocks')
@@ -34,7 +35,7 @@ export class FinanceInteligenceController {
   @ApiOperation({ summary: 'Criar um registro de ação.' })
   @UsePipes(new ValidationPipe({ whitelist: true }))
   @ApiResponse({ status: 201, description: 'Registro criado com sucesso!' })
-  async create(
+  public async create(
     @Body() body: CreateStockDto,
   ): Promise<FinanceInteligenceEntity> {
     return this.repository.create(body);
@@ -46,14 +47,14 @@ export class FinanceInteligenceController {
     status: 200,
     description: 'Registros encontrados com sucesso!',
   })
-  async findAll(): Promise<FinanceInteligenceEntity[]> {
+  public async findAll(): Promise<FinanceInteligenceEntity[]> {
     return this.repository.findAll();
   }
 
   @Get(':id')
   @ApiOperation({ summary: 'Buscar um registro de ação.' })
   @ApiResponse({ status: 200, description: 'Registro encontrado com sucesso!' })
-  async findOne(
+  public async findOne(
     @Param('id', ParseUUIDPipe) id: UUID,
   ): Promise<FinanceInteligenceEntity | null> {
     return this.repository.findOne(id);
@@ -63,7 +64,7 @@ export class FinanceInteligenceController {
   @ApiOperation({ summary: 'Atualizar um registro de ação.' })
   @ApiResponse({ status: 200, description: 'Registro atualizado com sucesso!' })
   @UsePipes(new ValidationPipe({ whitelist: true }))
-  async update(
+ public async update(
     @Param('id', ParseUUIDPipe) id: UUID,
     @Body() body: UpdateStockDto,
   ): Promise<FinanceInteligenceEntity> {
@@ -73,19 +74,24 @@ export class FinanceInteligenceController {
   @Delete(':id')
   @ApiOperation({ summary: 'Deletar um registro de ação.' })
   @ApiResponse({ status: 201, description: 'Registro deletado com sucesso!' })
-  async remove(@Param('id', ParseUUIDPipe) id: UUID): Promise<void> {
+  public async remove(@Param('id', ParseUUIDPipe) id: UUID): Promise<void> {
     return this.repository.remove(id);
   }
 
   @Get('variation/:ticker')
   @ApiOperation({ summary: 'Consultar variação da ação pelo ticker.' })
   @ApiResponse({ status: 200, description: 'Variação retornada com sucesso.' })
-  async getMarketVariation(@Param('ticker') ticker: string): Promise<VariationStockDto> {
+  public async getMarketVariation(
+    @Param('ticker') ticker: string,
+  ): Promise<VariationStockDto> {
     const stockFinded = await this.repository.findOneByTicker(ticker);
 
     if (!stockFinded) throw new NotFoundException('Ação não encontrada');
 
     const currentPrice = await this.marketPriceService.getPrice(ticker);
-    return this.financeInteligenceService.calculateVariation(stockFinded, currentPrice)
+    return this.financeInteligenceService.calculateVariation(
+      stockFinded,
+      currentPrice,
+    );
   }
 }

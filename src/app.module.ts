@@ -8,6 +8,7 @@ import { FinanceInteligenceEntity } from './finance_inteligence/entity/finance-i
 import { MarketPriceService } from './market_integration/services/market-price.service';
 import { MarketIntegrationController } from './market_integration/market-integration.controller';
 import { FinanceInteligenceService } from './finance_inteligence/services/finance-inteligence.service';
+import { RecommendationController } from './recommendation/recommendation.controller';
 
 @Module({
   imports: [
@@ -31,7 +32,7 @@ import { FinanceInteligenceService } from './finance_inteligence/services/financ
     }),
     TypeOrmModule.forFeature([FinanceInteligenceEntity]),
   ],
-  controllers: [FinanceInteligenceController, MarketIntegrationController],
+  controllers: [FinanceInteligenceController, MarketIntegrationController, RecommendationController],
   providers: [FinanceInteligenceRepository, MarketPriceService, FinanceInteligenceService],
   exports: [MarketPriceService, FinanceInteligenceService],
 })

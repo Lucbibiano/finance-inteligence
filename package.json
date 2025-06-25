@@ -79,5 +79,20 @@
     ],
     "coverageDirectory": "../coverage",
     "testEnvironment": "node"
-  }
+  },
+    "configurations": [
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Debug NestJS App",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": [
+        "run",
+        "start:debug"
+      ],
+      "port": 9229,
+      "cwd": "${workspaceFolder}/finance-inteligence-services",
+      "autoAttachChildProcesses": true
+    }
+  ]
 }
