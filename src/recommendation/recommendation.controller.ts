@@ -1,7 +1,4 @@
-import {
-  Controller,
-  Get,
-} from '@nestjs/common';
+import { Controller, Get } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { FinanceInteligenceService } from '../finance_inteligence/services/finance-inteligence.service';
 import { RecommendationDto } from './dto/recommendation.dto';
@@ -23,5 +20,11 @@ export class RecommendationController {
   })
   public async getRecommendation(): Promise<RecommendationDto> {
     return this.financeInteligenceService.getRecommendation();
+  }
+
+  @Get('/stocks/buy-next/ia')
+  @ApiOperation({ summary: 'Recomendar ação para compra com base em IA' })
+  public async getSmartRecommendation() {
+    return this.financeInteligenceService.getRecommendationWithIA();
   }
 }

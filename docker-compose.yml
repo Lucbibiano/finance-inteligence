@@ -4,15 +4,17 @@ services:
     build: .
     ports:
       - '3000:3000'
+    env_file: 
+        .env
     environment:
       DATABASE_HOST: 127.0.0.1
       DATABASE_PORT: 3306
       DATABASE_USER: root
       DATABASE_PASSWORD: root
       DATABASE_NAME: finance_inteligence_db
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
     volumes:
       - .:/app
-      - /app/node_modules
     network_mode: host
 
   mysql:

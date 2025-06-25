@@ -17,7 +17,7 @@ import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { CreateStockDto } from './dto/create-stock.dto';
 import { UpdateStockDto } from './dto/update-stock.dto';
 import { UUID } from 'crypto';
-import { MarketPriceService } from '../market_integration/services/market-price.service';
+import { MarketService } from '../market_integration/services/market.service';
 import { FinanceInteligenceService } from './services/finance-inteligence.service';
 import { VariationStockDto } from './dto/variation-stock.dto';
 import { RecommendationDto } from '../recommendation/dto/recommendation.dto';
@@ -27,7 +27,7 @@ import { RecommendationDto } from '../recommendation/dto/recommendation.dto';
 export class FinanceInteligenceController {
   constructor(
     private readonly repository: FinanceInteligenceRepository,
-    private readonly marketPriceService: MarketPriceService,
+    private readonly marketService: MarketService,
     private readonly financeInteligenceService: FinanceInteligenceService,
   ) {}
 
@@ -88,7 +88,7 @@ export class FinanceInteligenceController {
 
     if (!stockFinded) throw new NotFoundException('Ação não encontrada');
 
-    const currentPrice = await this.marketPriceService.getPrice(ticker);
+    const currentPrice = await this.marketService.getPrice(ticker);
     return this.financeInteligenceService.calculateVariation(
       stockFinded,
       currentPrice,
