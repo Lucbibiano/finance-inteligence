@@ -1,11 +1,12 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, InternalServerErrorException, Logger } from '@nestjs/common';
 import axios from 'axios';
+import yahooFinance from 'yahoo-finance2';
 
 @Injectable()
 export class MarketService {
   private readonly logger = new Logger(MarketService.name);
 
-  async getPrice(ticker: string): Promise<number> {
+  public async getPrice(ticker: string): Promise<number> {
     const url = `https://brapi.dev/api/quote/${ticker.toUpperCase()}`;
     const authToken = `${process.env.BRAPI_TOKEN}`;
     const response = await axios.get(url, {
@@ -22,21 +23,32 @@ export class MarketService {
     return data.regularMarketPrice;
   }
 
-  // TROCAR ESTA API
-async getFundamentals(ticker: string) {
-    try {
-      const resp = await axios.get(`https://brapi.dev/api/quote/${ticker.toUpperCase()}`);
-      const data = resp.data?.results?.[0] ?? {};
+  public async getFundamentals(ticker: string) {
+      try {
+      const data = await yahooFinance.quoteSummary(`${ticker}.SA`, {
+        modules: ['defaultKeyStatistics', 'financialData', 'summaryDetail'],
+      });
 
       return {
-        pl: data.peRatio,
-        dividendYield: data.dividendYield * 100,
-        evEbitda: data.evEbitda,
-        pb: data.pbRatio,
+        ticker,
+        peRatio: data.summaryDetail?.trailingPE,
+        forwardPE: data.summaryDetail?.forwardPE,
+        roe: data.financialData?.returnOnEquity,
+        roa: data.financialData?.returnOnAssets,
+        dividendYield: data.summaryDetail?.dividendYield,
+        profitMargins: data.financialData?.profitMargins,
+        operatingMargins: data.financialData?.operatingMargins,
+        bookValue: data.defaultKeyStatistics?.bookValue,
+        priceToBook: data.defaultKeyStatistics?.priceToBook,
+        debtToEquity: data.financialData?.debtToEquity,
+        revenueGrowth: data.financialData?.revenueGrowth,
+        earningsGrowth: data.financialData?.earningsGrowth,
+        marketCap: data.price?.marketCap,
+        ebitda: data.financialData?.ebitda,
       };
-    } catch (err) {
-      this.logger.error(`Erro Brapi para ${ticker}`, err.message);
-      return null;
+    } catch (error) {
+      console.error('Erro ao buscar dados do Yahoo Finance:', error);
+      throw new InternalServerErrorException('Erro ao buscar indicadores fundamentalistas.');
     }
-  } 
+  }
 }

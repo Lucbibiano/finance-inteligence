@@ -99,7 +99,9 @@ export class FinanceInteligenceService {
     // Calcula a porcentagem atual de cada ação na carteira
     const stocksWithfundamentalIndicators = await Promise.all(
       stocks.map(async (stock, i) => {
-        const fundamentals = await this.marketService.getFundamentals(stock.ticker);
+        const fundamentals = await this.marketService.getFundamentals(
+          stock.ticker,
+        );
         const currentValue = stock.quantity * prices[i];
         const currentPercent = Number(
           ((currentValue / totalValue) * 100).toFixed(2),
@@ -108,52 +110,64 @@ export class FinanceInteligenceService {
           ...stock,
           currentPrice: prices[i],
           currentPercent,
-          pl: fundamentals?.pl,
-          dividendYield: fundamentals?.dividendYield,
-          evEbitda: fundamentals?.evEbitda,
-          pb: fundamentals?.pb,
+          peRatio: fundamentals.peRatio,
+          forwardPE: fundamentals.forwardPE,
+          roe: fundamentals.roe,
+          roa: fundamentals.roa,
+          dividendYield: fundamentals.dividendYield,
+          profitMargins: fundamentals.profitMargins,
+          operatingMargins: fundamentals.operatingMargins,
+          bookValue: fundamentals.bookValue,
+          priceToBook: fundamentals.priceToBook,
+          debtToEquity: fundamentals.debtToEquity,
+          revenueGrowth: fundamentals.revenueGrowth,
+          earningsGrowth: fundamentals.earningsGrowth,
+          marketCap: fundamentals.marketCap,
+          ebitda: fundamentals.ebitda,
         };
       }),
     );
-    console.log(
-      'stocksWithfundamentalIndicators',
-      stocksWithfundamentalIndicators,
-    );
-
-    // Montar prompt para IA
-    const prompt = this.buildPrompt();
 
     //  Chamar a IA
-    // const response = await this.openai.chat.completions.create({
-    //   model: 'gpt-3.5-turbo',
-    //   messages: [
-    //     {
-    //       role: 'user',
-    //       content:
-    //         prompt +
-    //         `Dados: ` +
-    //         JSON.stringify(stocksWithfundamentalIndicators, null, 2),
-    //     },
-    //   ],
-    //   temperature: 0.7,
-    // });
+    const response = await this.openai.chat.completions.create({
+      model: 'gpt-3.5-turbo',
+      messages: [
+        {
+          role: 'user',
+          content:
+            this.buildPrompt() +
+            `Dados: ` +
+            JSON.stringify(stocksWithfundamentalIndicators, null, 2),
+        },
+      ],
+      temperature: 0.7,
+    });
 
-    // const content = response.choices[0].message.content;
+    const messageContent = response.choices[0].message.content;
+    if (!messageContent) {
+      throw new Error('OpenAI response content is null');
+    }
+    const content = JSON.parse(messageContent);
 
     return {
-      // recommendation: content,
+      recommendation: content,
       data: stocksWithfundamentalIndicators,
     };
   }
 
   private buildPrompt(): string {
     return `
-Você é um especialista em investimentos. Sua tarefa é recomendar a próxima ação que o investidor deve comprar, com base em:
+Você é um especialista em investimentos. 
+O investidor possui uma carteira de ações e deseja recomendações de compra.
+Ele compra ações mensalmente, a um valor em torno de 250 reais e 750 reais.
+O investidor possui uma carteira já distribuida com o percentual desejado de cada ação.
+Sua tarefa é recomendar a próxima ação que o investidor deve comprar, com base em:
 
-- A diferença entre percentual atual e percentual esperado.
+- A diferença entre percentual atual e percentual esperado/desejado.
 - O preço atual da ação.
-- Indicadores fundamentalistas (PL baixo, ROE alto, Dividend Yield atrativo).
-- Tendência de mercado (simule com base nos dados).
+- Indicadores fundamentalistas.
+- Tendência de mercado.
+- Pesquise brevemente as últimas notícias dos ativos nom mercado
 
 Retorne os tickers em ordem de prioridade de compra, explicando brevemente o motivo. Formato:
 
