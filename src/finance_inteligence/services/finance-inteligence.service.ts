@@ -149,6 +149,9 @@ export class FinanceInteligenceService {
     }
     const content = JSON.parse(messageContent);
 
+    // Persistindo recomendações da IA no banco de dados
+    await this.marketService.saveRecommendations(content);
+
     return {
       recommendation: content,
       data: stocksWithfundamentalIndicators,

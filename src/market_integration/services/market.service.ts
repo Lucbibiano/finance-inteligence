@@ -1,9 +1,19 @@
-import { Injectable, InternalServerErrorException, Logger } from '@nestjs/common';
+import {
+  Injectable,
+  InternalServerErrorException,
+  Logger,
+} from '@nestjs/common';
 import axios from 'axios';
 import yahooFinance from 'yahoo-finance2';
+import { StockRecommendationRepository } from '../repository/stock-recommendation.repository';
+import { StockRecommendationDto } from '../dto/stock-recommendation.dto';
 
 @Injectable()
 export class MarketService {
+  constructor(
+    private readonly stockRecommendationRepo: StockRecommendationRepository,
+  ) {}
+
   private readonly logger = new Logger(MarketService.name);
 
   public async getPrice(ticker: string): Promise<number> {
@@ -24,7 +34,7 @@ export class MarketService {
   }
 
   public async getFundamentals(ticker: string) {
-      try {
+    try {
       const data = await yahooFinance.quoteSummary(`${ticker}.SA`, {
         modules: ['defaultKeyStatistics', 'financialData', 'summaryDetail'],
       });
@@ -48,7 +58,19 @@ export class MarketService {
       };
     } catch (error) {
       console.error('Erro ao buscar dados do Yahoo Finance:', error);
-      throw new InternalServerErrorException('Erro ao buscar indicadores fundamentalistas.');
+      throw new InternalServerErrorException(
+        'Erro ao buscar indicadores fundamentalistas.',
+      );
     }
+  }
+
+  public async saveRecommendations(recommendations: StockRecommendationDto[]) {
+    console.log('Saving recommendations:', recommendations);
+    const dataToSave = recommendations.map((rec) => ({
+      ticker: rec.ticker,
+      reason: rec.reason,
+      recommendationOrder: rec.recommendationOrder,
+    }));
+    return this.stockRecommendationRepo.saveMany(dataToSave);
   }
 }

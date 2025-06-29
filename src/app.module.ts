@@ -9,6 +9,8 @@ import { MarketService } from './market_integration/services/market.service';
 import { MarketIntegrationController } from './market_integration/market-integration.controller';
 import { FinanceInteligenceService } from './finance_inteligence/services/finance-inteligence.service';
 import { RecommendationController } from './recommendation/recommendation.controller';
+import { StockRecommendationEntity } from './market_integration/entity/stock-recommendation.entity';
+import { StockRecommendationRepository } from './market_integration/repository/stock-recommendation.repository';
 
 @Module({
   imports: [
@@ -30,10 +32,10 @@ import { RecommendationController } from './recommendation/recommendation.contro
         insecureAuth: true,
       },
     }),
-    TypeOrmModule.forFeature([FinanceInteligenceEntity]),
+    TypeOrmModule.forFeature([FinanceInteligenceEntity, StockRecommendationEntity]),
   ],
   controllers: [FinanceInteligenceController, MarketIntegrationController, RecommendationController],
-  providers: [FinanceInteligenceRepository, MarketService, FinanceInteligenceService],
+  providers: [FinanceInteligenceRepository, StockRecommendationRepository, MarketService, FinanceInteligenceService],
   exports: [MarketService, FinanceInteligenceService],
 })
 export class AppModule {}
